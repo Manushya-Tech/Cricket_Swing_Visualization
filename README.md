@@ -9,9 +9,9 @@ Outline: The things we are planning to explore during the course of the project 
 4. Fine-tune the visualization technique to provide better insights into the science behind swing bowling.
 
 Deliverables:
-(1) Code to take in the initial conditions of the ball and solve the differential equations and determine the cricket ball's trajectory. 
-(2) A visualisation setup to 3D plot the path of the cricket ball and examine how it swings under various starting conditions. 
-(3) A GUI for the purpose of automating the entire process.
+1. Code to take in the initial conditions of the ball and solve the differential equations and determine the cricket ball's trajectory. 
+2. A visualisation setup to 3D plot the path of the cricket ball and examine how it swings under various starting conditions. 
+3. A GUI for the purpose of automating the entire process.
 
 Timeline: Following would be the the rough timeline of the project
 Week 1-2: Coding a naive(unoptimized) algorithm for solving the differential equations involved in the problem
