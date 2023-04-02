@@ -1,24 +1,14 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from argparse import ArgumentParser
+from constants import Constants
+import os
+from visualize_mpl import Visualize
 
 
-class PhysicalEulerModel:
+class PhysicalEulerModel(Constants):
     def __init__(self) -> None:
-        self.g = 9.81  # m/s^2
-        self.m = 0.16  # kg
-        self.r = 0.036  # m
-        self.pi = np.pi
-        self.A = self.pi*self.r*self.r  # m^2
-        self.rho = 1.225  # kg/m^3
-        self.C = 0.5*self.rho*self.A/self.m  # 1/m
-        self.L = 20.12 - 1.22  # m; pitch length - crease length
-        self.RCD = 1.83  # m, Return crease distance from stumps
-        self.SH = 0.71  # m; stumps height
-        self.SW = 0.2286  # m; stumps width
-        self.MR = 2.5  # m; maxm vertical release
-        self.deg2rad = self.pi/180.0
-        self.kmph2mps = 0.277778
-        self.max_iter = 2000
+        super(PhysicalEulerModel, self).__init__()
 
     def get_position(self, release, theta, LDS, SHD, AL):
         xs = np.zeros(3, dtype=np.float64)
@@ -120,7 +110,7 @@ class PhysicalEulerModel:
       
 if __name__ == "__main__":
     parser = ArgumentParser(description="Input form CMD")
-    parser.add_argument('-v', '--speed', type=float, default=140.0)
+    parser.add_argument('-s', '--speed', type=float, default=140.0)
     parser.add_argument('-r', '--release', type=float, default=5.0)
     parser.add_argument('-t', '--theta', type=float, default=10.0)
     parser.add_argument('-b', '--bounce', type=float, default=0.8)
@@ -133,13 +123,14 @@ if __name__ == "__main__":
     parser.add_argument('-nb', '--new_ball', type=bool, default=False)
     parser.add_argument('-sh_tr', '--shallow_transit', type=bool, default=True)
     parser.add_argument('-ep', '--end_point', type=bool, default=False)
+    parser.add_argument('-v', '--visualize', type=bool, default=False)
     parser.add_argument('-dt', '--delta_t', type=float, default=0.005)
-    parser.add_argument("-o", "--filename", default=None)
+    parser.add_argument("-o", "--directory", default=None)
     
     args = parser.parse_args()
     
     phyModel = PhysicalEulerModel()
-    result = phyModel.get_ball_trajectory(speed=args.speed, 
+    traj = phyModel.get_ball_trajectory(speed=args.speed, 
                                           release=args.release,
                                           theta=args.theta,
                                           windspeed=[args.wind_x, args.wind_y, args.wind_z],
@@ -151,6 +142,23 @@ if __name__ == "__main__":
                                           shallow_transit=args.shallow_transit,
                                           dt=args.delta_t,
                                           history=not(args.end_point))
+    
+    vis = Visualize()
+    fig2d = vis.plot([traj,traj])
+    fig3d = vis.plot([traj], plot3d=True)
+    
+    if args.visualize:
+        vis.show_plot()
 
-    if args.filename is not None:
-        np.savez(args.filename, result)
+    if args.directory is not None:
+        dir_path = os.path.join(os.getcwd(),args.directory)
+        if os.path.exists(dir_path):
+            raise Exception("The current directory already exists. Choose a different directory!")
+        else:
+            os.mkdir(dir_path)
+        np.savez(os.path.join(dir_path,"traj.npz"), traj, args)
+        fig2d = vis.plot([traj,traj])
+        plt.savefig(os.path.join(dir_path,"2D_Plot.png"))
+        fig3d = vis.plot([traj], plot3d=True)
+        plt.savefig(os.path.join(dir_path,"3D_Plot.png"))
+        
